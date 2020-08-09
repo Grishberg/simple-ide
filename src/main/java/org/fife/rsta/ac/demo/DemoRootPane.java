@@ -10,6 +10,11 @@
  */
 package org.fife.rsta.ac.demo;
 
+import com.github.grishberg.profiler.common.CoroutinesDispatchersImpl;
+import com.github.grishberg.simpleide.projecttree.ProjectSourceTreeController;
+import com.github.grishberg.simpleide.projecttree.ProjectTreeView;
+import com.github.grishberg.simpleide.projecttree.ProjectTreeViewImpl;
+import kotlinx.coroutines.GlobalScope;
 import org.fife.rsta.ac.AbstractSourceTree;
 import org.fife.rsta.ac.LanguageSupport;
 import org.fife.rsta.ac.LanguageSupportFactory;
@@ -53,6 +58,7 @@ class DemoRootPane extends JRootPane implements HyperlinkListener,
     private JScrollPane treeSP;
     private AbstractSourceTree tree;
     private RSyntaxTextArea textArea;
+    private ProjectSourceTreeController projectSourceTreeController;
 
 
     public DemoRootPane() {
@@ -78,10 +84,12 @@ class DemoRootPane extends JRootPane implements HyperlinkListener,
         scrollPane.setIconRowHeaderEnabled(true);
         scrollPane.getGutter().setBookmarkingEnabled(true);
 
-        exportToFile();
+        //exportToFile();
+        projectSourceTreeController = new ProjectSourceTreeController(GlobalScope.INSTANCE, new CoroutinesDispatchersImpl());
+        ProjectTreeViewImpl projectTreeView = new ProjectTreeViewImpl(projectSourceTreeController);
 
         final JSplitPane sp = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-                treeSP, scrollPane);
+                projectTreeView.getScrollPane(), scrollPane);
         SwingUtilities.invokeLater(() -> sp.setDividerLocation(0.25));
         sp.setContinuousLayout(true);
 //		setContentPane(sp);
@@ -110,6 +118,7 @@ class DemoRootPane extends JRootPane implements HyperlinkListener,
 
         JMenu menu = new JMenu("File");
         menu.add(new JMenuItem(new OpenAction(this)));
+        menu.add(new JMenuItem(new OpenProjectAction(this)));
         menu.addSeparator();
         menu.add(new JMenuItem(new ExitAction()));
         mb.add(menu);
@@ -168,11 +177,11 @@ class DemoRootPane extends JRootPane implements HyperlinkListener,
         textArea.setCodeFoldingEnabled(true);
         textArea.setTabsEmulated(true);
         textArea.setTabSize(3);
-        textArea.setBackground(new Color(0x3D3D3D));
-        textArea.setMarkOccurrencesColor(new Color(0x222222));
-        textArea.setSelectionColor(new Color(105, 105, 147));
-        textArea.setMatchedBracketBGColor(new Color(0x65C42B));
-        textArea.setHyperlinkForeground(new Color(0x2B94C4));
+        //textArea.setBackground(new Color(0x3D3D3D));
+        //textArea.setMarkOccurrencesColor(new Color(0x222222));
+        //textArea.setSelectionColor(new Color(105, 105, 147));
+        //textArea.setMatchedBracketBGColor(new Color(0x65C42B));
+        //textArea.setHyperlinkForeground(new Color(0x2B94C4));
 
         String schemeAsString = textArea.getSyntaxScheme().toCommaSeparatedString();
         //SyntaxScheme scheme = SyntaxScheme.loadFromString();
@@ -259,6 +268,7 @@ class DemoRootPane extends JRootPane implements HyperlinkListener,
             textArea.read(r, null);
             textArea.setCaretPosition(0);
             r.close();
+
         } catch (IOException ioe) {
             ioe.printStackTrace();
             UIManager.getLookAndFeel().provideErrorFeedback(this);
@@ -333,5 +343,9 @@ class DemoRootPane extends JRootPane implements HyperlinkListener,
             textArea.setText("Type here to see syntax highlighting");
         }
 
+    }
+
+    public void openProject(File selectedFile) {
+        projectSourceTreeController.loadTree(selectedFile);
     }
 }

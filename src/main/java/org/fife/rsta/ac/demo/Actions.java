@@ -103,6 +103,37 @@ interface Actions {
 
     }
 
+    /**
+     * Lets the user open a file.
+     */
+    class OpenProjectAction extends AbstractAction {
+
+        private static final long serialVersionUID = 1L;
+
+        private DemoRootPane demo;
+        private JFileChooser chooser;
+
+        public OpenProjectAction(DemoRootPane demo) {
+            this.demo = demo;
+            putValue(NAME, "Open project...");
+            putValue(MNEMONIC_KEY, (int)'P');
+            int mods = demo.getToolkit().getMenuShortcutKeyMask();
+            KeyStroke ks = KeyStroke.getKeyStroke(KeyEvent.VK_P, mods);
+            putValue(ACCELERATOR_KEY, ks);
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            int option = fileChooser.showOpenDialog(demo);
+            if(option == JFileChooser.APPROVE_OPTION){
+                demo.openProject(fileChooser.getSelectedFile());
+            }
+        }
+
+    }
+
 
     /**
      * Changes the look and feel of the demo application.

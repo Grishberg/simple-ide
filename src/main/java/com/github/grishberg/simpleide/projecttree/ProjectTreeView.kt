@@ -12,17 +12,19 @@ interface ProjectTreeView {
 
 class ProjectTreeViewImpl(
         private val controller: ProjectSourceTreeController
-): ProjectTreeView {
+) : ProjectTreeView {
     private val tree = JTree(DefaultMutableTreeNode())
     val scrollPane = JScrollPane(tree)
     private val treeModel: DefaultTreeModel? = null
 
     init {
-        tree.setShowsRootHandles(true)
+        tree.showsRootHandles = true
+        tree.isRootVisible = false
         controller.view = this
     }
 
     override fun updateRoot(root: DefaultMutableTreeNode) {
+        tree.isRootVisible = true
         val treeModel = DefaultTreeModel(root)
         tree.model = treeModel
     }

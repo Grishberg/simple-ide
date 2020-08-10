@@ -4,10 +4,8 @@ import com.github.grishberg.profiler.common.CoroutinesDispatchers
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-import java.awt.geom.Rectangle2D
 import java.io.File
 import javax.swing.tree.DefaultMutableTreeNode
-
 
 
 class ProjectSourceTreeController(
@@ -40,11 +38,22 @@ class ProjectSourceTreeController(
         val files = fileRoot.listFiles() ?: return
 
         for (file in files) {
+            if (shouldIgnoreFile(file)) {
+                continue
+            }
             val childNode = DefaultMutableTreeNode(FileNode(file))
             node.add(childNode)
             if (file.isDirectory) {
                 createChildren(file, childNode)
             }
         }
+    }
+
+    private fun shouldIgnoreFile(file: File?): Boolean {
+        if (file == null) return true
+        if (file.name == ".DS_Store") {
+            return true
+        }
+        return false
     }
 }
